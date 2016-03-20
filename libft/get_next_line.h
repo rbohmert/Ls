@@ -1,34 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_memccpy.c                                       :+:      :+:    :+:   */
+/*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rbohmert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2015/11/24 14:39:14 by rbohmert          #+#    #+#             */
-/*   Updated: 2016/02/02 18:06:23 by rbohmert         ###   ########.fr       */
+/*   Created: 2016/01/25 21:55:48 by rbohmert          #+#    #+#             */
+/*   Updated: 2016/02/20 20:37:35 by rbohmert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
+# define BUFF_SIZE 64
+# define MAX_FD 10
+# include "libft.h"
+# include <string.h>
+# include <stdlib.h>
+# include <fcntl.h>
+# include <unistd.h>
+# include <stdio.h>
 
-void				*ft_memccpy(void *dst, const void *src, int c, size_t n)
-{
-	size_t			i;
-	unsigned char	*tmp;
-	unsigned char	*tmp2;
-	unsigned char	uc;
+char	*ft_realloc(char *buf, int size);
+int		get_line(int fd, char **line, char *rest, int i);
+int		sort(int fd, char **line, char *rest);
+int		get_next_line(int fd, char **line);
 
-	i = 0;
-	tmp = (unsigned char *)dst;
-	tmp2 = (unsigned char *)src;
-	uc = (unsigned char)c;
-	while (i < n)
-	{
-		tmp[i] = tmp2[i];
-		if (tmp2[i] == uc)
-			return (tmp + i + 1);
-		i++;
-	}
-	return (NULL);
-}
+#endif
