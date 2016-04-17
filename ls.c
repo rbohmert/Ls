@@ -6,143 +6,125 @@
 /*   By: rbohmert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/02/02 16:16:41 by rbohmert          #+#    #+#             */
-/*   Updated: 2016/02/18 23:52:28 by rbohmert         ###   ########.fr       */
+/*   Updated: 2016/04/15 21:16:08 by rbohmert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
 
-char 	*add_path(char *path, char *rep)
+void	stock(t_list **list, DIR *rep, char *str, t_options *opt)
 {
-	char *res;
-
-	if (!(res = (char *)malloc(ft_strlen(rep) + ft_strlen(path) + 3)))
-		return (NULL);
-	ft_strcpy(res, path);
-	ft_strcat(res, "/");
-	ft_strcat(res, rep);
-	return (res);
-}
-
-void	stock(t_list **list, t_list **list_dir, DIR *rep, char *str)
-{	
-	struct	dirent	*file = NULL;
-	struct	stat	*buf;
+	struct dirent	*file;
+	struct stat		*buf;
 	char			*path_name;
 	t_file			*file_s;
 
+	file = NULL;
+	*list = NULL;
 	while ((file = readdir(rep)))
 	{
-		if (!(buf = (struct stat *)malloc(sizeof(struct stat))) || !(file_s = (t_file *)malloc(sizeof(t_file))))
-			return;
+		if (!(buf = (struct stat *)malloc(sizeof(struct stat)))\
+			|| !(file_s = (t_file *)malloc(sizeof(t_file))))
+			return ;
 		path_name = add_path(str, file->d_name);
 		lstat(path_name, buf);
 		file_s->stat = buf;
 		file_s->name = ft_strdup(file->d_name);
+		file_s->path = path_name;
 		ft_push_back(list, file_s, 0);
-		if (S_ISDIR(buf->st_mode) && ft_strcmp(file->d_name, ".") != 0 && ft_strcmp(file->d_name, "..") != 0)
-			ft_push_back(list_dir, ft_strdup(path_name), 0);
-		free(path_name);
 	}
+	trier(list, 2);
+	(opt->t) ? trier(list, 3) : 0;
+	(opt->r) ? ft_list_reverse(list) : 0;
+	print(list, opt, 1);
 }
 
-void	free_list(t_list *list, int flag)
+void	ls_r(t_list *list, char *str, t_options *opt)
 {
-	t_list *tmp;
-	
-	if (!list)
-		return;
+	t_list	*tmp;
+	char	*path_name;
+
 	tmp = list;
 	while (tmp)
 	{
-		if (flag)
+		if ((S_ISDIR(L(tmp)->stat->st_mode) && ft_strcmp(L(tmp)->name, ".")\
+			!= 0 && ft_strcmp(L(tmp)->name, "..") != 0) && (!(*(L(tmp)->name)\
+			== '.') || opt->a))
 		{
-			free(((t_file *)tmp->content)->name);
-			free(((t_file *)tmp->content)->stat);
+			path_name = add_path(str, L(tmp)->name);
+			ft_putstr("\n");
+			ft_putstr(path_name);
+			ft_putstr(":\n");
+			ft_ls(path_name, opt);
+			free(path_name);
 		}
-		free(tmp->content);
 		tmp = tmp->next;
 	}
-	tmp = list;
-	list = list->next;
-	while (list)
-	{
-		free(tmp);
-		tmp = list;
-		list = list->next;
-	}
-	free(tmp);
 }
 
-
-int					ft_ls(char *str, t_options *opt)
+int		ft_ls(char *str, t_options *opt)
 {
-	DIR				*rep = NULL;
-	t_list			*list = NULL;
-	t_list			*list_dir = NULL; 
-	t_list			*tmp;
+	DIR				*rep;
+	t_list			*list;
 
+	rep = NULL;
+	list = NULL;
 	if (!(rep = opendir(str)))
 	{
-		perror("Error ");
-		exit(2);
+		ft_putstr("ls: ");
+		ft_putstr(ft_strrchr(str, '/') ? ft_strrchr(str, '/') + 1 : str);
+		ft_putstr(": ");
+		perror("");
 	}
-	stock(&list, &list_dir, rep, str);
-	trier(&list_dir, 1);
-	opt->r ? ft_list_reverse(&list) : 0;
-	print(list, opt);
-	if (closedir(rep) == -1)
+	else
 	{
-		perror("Error ");
-		exit(2);
-	}
-	tmp = list_dir;
-	while (tmp && opt->R)
-	{
-		if (!(*(char*)tmp->content == '.') || opt->a)
+		stock(&list, rep, str, opt);
+		if (closedir(rep) == -1)
 		{
-			ft_putstr(tmp->content);
-			ft_putstr(":\n");
-			ft_ls(tmp->content, opt);
+			perror("Error ");
+			exit(2);
 		}
-		tmp = tmp->next;
 	}
+	if (list && opt->R)
+		ls_r(list, str, opt);
 	free_list(list, 1);
-	free_list(list_dir, 0);
 	return (1);
 }
 
-int main (int ac, char **av)
+void	multi_file(t_list *rep_list, t_list *fil_list, t_options *opt)
+{
+	(fil_list) ? print(&fil_list, opt, 0) : 0;
+	(fil_list && rep_list) ? write(1, "\n", 1) : 0;
+	while (rep_list)
+	{
+		ft_putstr(L(rep_list)->name);
+		ft_putendl(":");
+		ft_ls(L(rep_list)->name, opt);
+		(rep_list->next) ? ft_putstr("\n") : 0;
+		rep_list = rep_list->next;
+	}
+}
+
+int		main(int ac, char **av)
 {
 	t_options	opt;
-	t_list		*rep_list = NULL;
-	t_list		*fil_list = NULL;
+	t_list		*rep_list;
+	t_list		*fil_list;
 	int			nb_operand;
 
+	rep_list = NULL;
+	fil_list = NULL;
+	ac = 1;
 	init_opt(&opt);
 	nb_operand = parser(av, &opt, &rep_list, &fil_list);
 	if (nb_operand == 0)
 		ft_ls(".", &opt);
 	if (nb_operand == 1)
-	{
-		if (!fil_list && rep_list)
-			ft_ls(rep_list->content, &opt);
-		if (fil_list && !rep_list)
-			ft_putendl(((t_file *)fil_list->content)->name);
-	}
+		(!fil_list && rep_list) ? ft_ls(L(rep_list)->name, &opt)\
+		: print(&fil_list, &opt, 0);
 	if (nb_operand > 1)
-	{
-		print(fil_list, &opt);
-		while (rep_list)
-		{
-			ft_putstr("\n");
-			ft_putstr(rep_list->content);
-			ft_putendl(":");
-			ft_ls(rep_list->content, &opt);
-			rep_list = rep_list->next;
-		}
-	}
-	free_list(fil_list, 1);
-	free_list(rep_list, 0);
-	return 0;
+		multi_file(rep_list, fil_list, &opt);
+	(fil_list) ? free_list(fil_list, 0) : 0;
+	(rep_list) ? free_list(rep_list, 0) : 0;
+	return (0);
 }

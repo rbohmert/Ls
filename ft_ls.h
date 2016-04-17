@@ -13,6 +13,9 @@
 # include <pwd.h>
 # include <uuid/uuid.h>
 # include <grp.h>
+# include <sys/xattr.h>
+# include <sys/acl.h>
+# define L(a) ((t_file *)(a->content))
 
 typedef	struct	s_options
 {
@@ -26,16 +29,17 @@ typedef	struct	s_options
 typedef struct	s_file
 {
 	struct stat *stat;
+	char		*path;
 	char 		*name;
 }				t_file;
 
 void			ft_list_reverse(t_list **begin_list);
 int				ft_ls(char *str, t_options *opt);
 char			*add_path(char *path, char *rep);
-void			stock(t_list **list, t_list **list_dir, DIR *rep, char *str);
+//void			stock(t_list **list, DIR *rep, char *str);
 void			print_rights(struct stat *s_stat);
-void			print_l(t_file *file, int max1, int max2);
-void			print(t_list *list, t_options *opt);
+//void			print_l(t_file *file, int max1, int max2);
+void			print(t_list **list, t_options *opt, int flag);
 void			free_list(t_list *list, int flag);
 void			init_opt(t_options *opt);
 void			affect_option(t_options *opt, char c);
@@ -44,4 +48,5 @@ t_list			*separer(t_list *list);
 t_list			*fusion(t_list *lg, t_list *ld, int flag);
 void			trier(t_list **list, int fag);
 int				cmp(t_list *lg, t_list *ld, int flag);
+int				max_list(t_list *list, int max[4], t_options *opt);
 #endif
