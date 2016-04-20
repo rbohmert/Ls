@@ -6,7 +6,7 @@
 /*   By: rbohmert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/02/16 12:02:59 by rbohmert          #+#    #+#             */
-/*   Updated: 2016/04/17 16:36:21 by rbohmert         ###   ########.fr       */
+/*   Updated: 2016/04/21 00:54:02 by rbohmert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,31 +41,30 @@ void	print_rights(struct stat *stat)
 		(stat->st_mode & S_ISGID) ? ft_putchar('T') : ft_putchar('-');
 }
 
-void	print_sp(t_file *file, int max, int flag, int i)
+void	print_sp(t_file *file, t_align *al, int flag, int i)
 {
-	int				tmp;
-	struct passwd	*passwd;
+	int				len;
 	struct group	*grp;
+	struct passwd	*passwd;
 
 	passwd = getpwuid(file->stat->st_uid);
 	grp = getgrgid(file->stat->st_gid);
-	tmp = (flag == 0) ? file->stat->st_nlink : file->stat->st_size;
-	if (flag == 0 || flag == 1)
+	len = nb_len(file->stat->st_nlink);
+	if (flag == 0)
 	{
-		while ((tmp = tmp / 10))
-			i++;
-		while (tmp++ <= max + 1 - i)
-			ft_putchar(' ');
-	}
-	else if (flag == 2)
-	{
-		while ((int)(i++ + ft_strlen(passwd->pw_name)) <= max)
+		while (i++ <= al->syml - len)
 			ft_putchar(' ');
 	}
 	else
 	{
+		ft_putstr(passwd->pw_name);
+		len = ft_strlen(passwd->pw_name);
+		while (i++ + len <= al->usr + 1)
+			ft_putchar(' ');
 		ft_putstr(grp->gr_name);
-		while ((int)(i++ + ft_strlen(grp->gr_name)) < max - 1)
+		i = -1;
+		len = ft_strlen(grp->gr_name);
+		while (i++ + len < al->grp)
 			ft_putchar(' ');
 	}
 }
@@ -93,10 +92,10 @@ void	print_l_2(t_file *file)
 	ft_putchar('\n');
 }
 
-void	print_l(t_file *file, int max[4])
+void	print_l(t_file *file, t_align *al)
 {
-	struct passwd	*passwd;
 	acl_t			acl;
+	struct passwd	*passwd;
 
 	acl = NULL;
 	passwd = getpwuid(file->stat->st_uid);
@@ -105,28 +104,26 @@ void	print_l(t_file *file, int max[4])
 		ft_putchar('@');
 	else if ((acl = acl_get_file(file->path, ACL_TYPE_EXTENDED)))
 		ft_putchar('+');
-	print_sp(file, max[0], 0,\
-		(listxattr(file->path, NULL, 0, XATTR_NOFOLLOW) > 0|| acl) ? 1 : 0);
+	else
+		ft_putchar(' ');
+	print_sp(file, al, 0, 0);
 	ft_putnbr(file->stat->st_nlink);
 	ft_putchar(' ');
-	ft_putstr(passwd->pw_name);
-	print_sp(file, max[2], 2, -1);
-	print_sp(file, max[3], 3, -1);
-	print_sp(file, max[1], 1, 0);
-	ft_putnbr(file->stat->st_size);
+	print_sp(file, al, 1, 0);
+	put_size(file, al);
 	ft_putstr(" ");
 	print_l_2(file);
 }
 
 void	print(t_list **list, t_options *opt, int flag)
 {
-	int			max[4];
+	t_align		al;
 	int			tot;
 	t_list		*tmp;
 
-	ft_bzero(max, sizeof(int) * 4);
+	ft_bzero(&al, sizeof(t_align));
 	tmp = *list;
-	tot = (opt->l) ? max_list(tmp, max, opt) : 0;
+	tot = (opt->l) ? max_list(tmp, &al, opt) : 0;
 	if (opt->l && flag)
 	{
 		write(1, "total ", 6);
@@ -138,7 +135,7 @@ void	print(t_list **list, t_options *opt, int flag)
 		if (L(tmp)->name[0] != '.' || opt->a)
 		{
 			if (opt->l)
-				print_l(tmp->content, max);
+				print_l(tmp->content, &al);
 			else
 				ft_putendl(L(tmp)->name);
 		}

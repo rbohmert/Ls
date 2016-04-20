@@ -6,7 +6,7 @@
 /*   By: rbohmert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/02/02 16:16:41 by rbohmert          #+#    #+#             */
-/*   Updated: 2016/04/15 21:16:08 by rbohmert         ###   ########.fr       */
+/*   Updated: 2016/04/21 01:40:55 by rbohmert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ int		ft_ls(char *str, t_options *opt)
 			exit(2);
 		}
 	}
-	if (list && opt->R)
+	if (list && opt->gr)
 		ls_r(list, str, opt);
 	free_list(list, 1);
 	return (1);
@@ -115,7 +115,7 @@ int		main(int ac, char **av)
 	rep_list = NULL;
 	fil_list = NULL;
 	ac = 1;
-	init_opt(&opt);
+	ft_bzero(&opt, sizeof(t_options));
 	nb_operand = parser(av, &opt, &rep_list, &fil_list);
 	if (nb_operand == 0)
 		ft_ls(".", &opt);

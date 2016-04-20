@@ -6,20 +6,11 @@
 /*   By: rbohmert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/02/15 23:32:39 by rbohmert          #+#    #+#             */
-/*   Updated: 2016/04/13 00:00:00 by rbohmert         ###   ########.fr       */
+/*   Updated: 2016/04/21 01:39:46 by rbohmert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
-
-void	init_opt(t_options *opt)
-{
-	opt->l = 0;
-	opt->r = 0;
-	opt->R = 0;
-	opt->t = 0;
-	opt->a = 0;
-}
 
 void	affect_option(t_options *opt, char c)
 {
@@ -29,7 +20,7 @@ void	affect_option(t_options *opt, char c)
 		opt->r += (c == 'r') ? 1 : 0;
 		opt->a += (c == 'a') ? 1 : 0;
 		opt->t += (c == 't') ? 1 : 0;
-		opt->R += (c == 'R') ? 1 : 0;
+		opt->gr += (c == 'R') ? 1 : 0;
 		return ;
 	}
 	else
