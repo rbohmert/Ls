@@ -6,7 +6,7 @@
 /*   By: rbohmert <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/04/21 00:30:19 by rbohmert          #+#    #+#             */
-/*   Updated: 2016/04/21 01:38:28 by rbohmert         ###   ########.fr       */
+/*   Updated: 2016/04/21 05:32:32 by rbohmert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@ void	get_len(t_align *al)
 
 void	compare(t_file *file, t_align *al)
 {
-	struct passwd	*passwd;
-	struct group	*grp;
+	struct passwd	*p;
+	struct group	*g;
 
-	passwd = getpwuid(file->stat->st_uid);
-	grp = getgrgid(file->stat->st_gid);
+	p = getpwuid(file->stat->st_uid);
+	g = getgrgid(file->stat->st_gid);
 	if (S_ISBLK(file->stat->st_mode) || S_ISCHR(file->stat->st_mode))
 	{
 		al->is = 1;
@@ -39,10 +39,10 @@ void	compare(t_file *file, t_align *al)
 		al->syml = file->stat->st_nlink;
 	if (al->size < file->stat->st_size)
 		al->size = file->stat->st_size;
-	if (al->usr < (int)ft_strlen(passwd->pw_name))
-		al->usr = ft_strlen(passwd->pw_name);
-	if (al->grp < (int)ft_strlen(grp->gr_name))
-		al->grp = ft_strlen(grp->gr_name);
+	if (al->usr < (int)ft_strlen(p ? p->pw_name : ft_itoa(file->stat->st_uid)))
+		al->usr = ft_strlen(p ? p->pw_name : ft_itoa(file->stat->st_uid));
+	if (al->grp < (int)ft_strlen(g ? g->gr_name : ft_itoa(file->stat->st_gid)))
+		al->grp = ft_strlen(g ? g->gr_name : ft_itoa(file->stat->st_gid));
 }
 
 int		max_list(t_list *list, t_align *al, t_options *opt)
