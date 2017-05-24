@@ -73,13 +73,13 @@ void	print_l_2(t_file *file)
 {
 	char			str[100];
 
-	if (file->stat->st_mtimespec.tv_sec < time(NULL) \
-		&& (time(NULL) - file->stat->st_mtimespec.tv_sec) < 15811200LL)
-		write(1, ctime(&(file->stat->st_mtimespec.tv_sec)) + 4, 12);
+	if (file->stat->st_mtim.tv_sec < time(NULL) \
+		&& (time(NULL) - file->stat->st_mtim.tv_sec) < 15811200LL)
+		write(1, ctime(&(file->stat->st_mtim.tv_sec)) + 4, 12);
 	else
 	{
-		write(1, ctime(&(file->stat->st_mtimespec.tv_sec)) + 4, 7);
-		write(1, ctime(&(file->stat->st_mtimespec.tv_sec)) + 19, 5);
+		write(1, ctime(&(file->stat->st_mtim.tv_sec)) + 4, 7);
+		write(1, ctime(&(file->stat->st_mtim.tv_sec)) + 19, 5);
 	}
 	ft_putstr(" ");
 	ft_putstr(file->name);
@@ -100,9 +100,9 @@ void	print_l(t_file *file, t_align *al)
 	acl = NULL;
 	passwd = getpwuid(file->stat->st_uid);
 	print_rights(file->stat);
-	if (listxattr(file->path, NULL, 0, XATTR_NOFOLLOW) > 0)
+	if (listxattr(file->path, NULL, 0, 0x0001) > 0)
 		ft_putchar('@');
-	else if ((acl = acl_get_file(file->path, ACL_TYPE_EXTENDED)))
+	else if ((acl = acl_get_file(file->path, 0x00000100)))
 		ft_putchar('+');
 	else
 		ft_putchar(' ');

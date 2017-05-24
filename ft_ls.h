@@ -24,7 +24,7 @@
 # include <pwd.h>
 # include <uuid/uuid.h>
 # include <grp.h>
-# include <sys/xattr.h>
+# include "/usr/include/linux/xattr.h"
 # include <sys/acl.h>
 # define L(a) ((t_file *)(a->content))
 # define MAJOR(dev) ((unsigned int)(dev >> 24))

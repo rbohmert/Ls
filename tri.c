@@ -46,11 +46,11 @@ int		cmp(t_list *lg, t_list *ld, int flag)
 	{
 		if (L(lg)->stat->st_mtime == L(ld)->stat->st_mtime)
 		{
-			if (L(lg)->stat->st_mtimespec.tv_nsec \
-					== L(ld)->stat->st_mtimespec.tv_nsec)
+			if (L(lg)->stat->st_mtim.tv_nsec \
+					== L(ld)->stat->st_mtim.tv_nsec)
 				return ((ft_strcmp(L(lg)->name, L(ld)->name) <= 0) ? 1 : 0);
-			return ((L(lg)->stat->st_mtimespec.tv_nsec \
-						> L(ld)->stat->st_mtimespec.tv_nsec) ? 1 : 0);
+			return ((L(lg)->stat->st_mtim.tv_nsec \
+						> L(ld)->stat->st_mtim.tv_nsec) ? 1 : 0);
 		}
 		return ((L(lg)->stat->st_mtime >= L(ld)->stat->st_mtime) ? 1 : 0);
 	}
